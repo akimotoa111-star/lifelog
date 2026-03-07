@@ -118,6 +118,24 @@ const views = {
       <button class="btn btn-primary" id="btn-save-run">記録する</button>
     </div>
     <div id="list-container" class="list-container"></div>
+  `,
+  book: `
+    <div class="card">
+      <div class="input-group">
+        <label class="input-label" for="book-date">日付</label>
+        <input type="date" id="book-date" class="input-field" />
+      </div>
+      <div class="input-group">
+        <label class="input-label" for="book-title">本のタイトル</label>
+        <input type="text" id="book-title" class="input-field" placeholder="例: 走れメロス" />
+      </div>
+      <div class="input-group">
+        <label class="input-label" for="book-memo">感想・メモ</label>
+        <textarea id="book-memo" class="input-field" placeholder="気づきや感想を入力"></textarea>
+      </div>
+      <button class="btn btn-primary" id="btn-save-book">記録する</button>
+    </div>
+    <div id="list-container" class="list-container"></div>
   `
 };
 
@@ -126,7 +144,8 @@ const viewTitles = {
   weight: '体重',
   money: 'お金',
   walk: '歩行',
-  run: '走る'
+  run: '走る',
+  book: '読書'
 };
 
 // =========================================================================
@@ -250,6 +269,14 @@ async function refreshList(viewName) {
             <div style="font-size: 0.9rem; color: var(--color-primary);">ペース: ${log.pace || '--:--'} /km</div>
           </div>
         `;
+      } else if (viewName === 'book') {
+        const memoHtml = log.memo ? `<div style="font-size: 0.9rem; margin-top: 4px; color: var(--color-text-secondary);">${log.memo.replace(/\n/g, '<br>')}</div>` : '';
+        html += `
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <div style="font-size: 1.1rem; font-weight: bold; color: var(--color-text);">『${log.title}』</div>
+            ${memoHtml}
+          </div>
+        `;
       }
 
       // 削除ボタン
@@ -349,6 +376,10 @@ function initViewLogic(viewName) {
           data.time = document.getElementById('run-time').value;
           data.pace = document.getElementById('run-pace').textContent;
           if (!data.dist || !data.time) return alert('距離と時間を入力してください');
+        } else if (viewName === 'book') {
+          data.title = document.getElementById('book-title').value;
+          data.memo = document.getElementById('book-memo').value;
+          if (!data.title) return alert('本のタイトルを入力してください');
         }
 
         // DBに保存
