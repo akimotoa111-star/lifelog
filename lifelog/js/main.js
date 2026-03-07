@@ -508,4 +508,9 @@ function initApp() {
 }
 
 // アプリの起動
-document.addEventListener('DOMContentLoaded', initApp);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  // すでにDOMの読み込みが完了している場合 (moduleや非同期の読み込み時)
+  initApp();
+}
