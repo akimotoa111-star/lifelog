@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>LifeLog - 50年使える日記帳</title>
+
+  <!-- お気に入りアイコンやPWA設定 -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+
+  <!-- 基本スタイル -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Google Fonts: 洗練されたサンセリフ体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Noto+Sans+JP:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+
+  <!-- Google Icons -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    rel="stylesheet" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <div class="app-container">
+    <header class="navbar">
+      <h1 class="nav-title" id="nav-title">日記</h1>
+      <button class="icon-button" id="btn-sync" title="同期" aria-label="Google Driveと同期">
+        <span class="material-symbols-outlined">cloud_sync</span>
+      </button>
+    </header>
+
+    <main class="content-area" id="main-content">
+      <!-- ここに各画面の内容がJavaScriptで動的に挿入されます -->
+    </main>
+
+    <footer class="bottom-nav">
+      <button class="nav-item active" data-view="diary">
+        <span class="material-symbols-outlined">book</span>
+        <span class="nav-label">日記</span>
+      </button>
+      <button class="nav-item" data-view="weight">
+        <span class="material-symbols-outlined">monitor_weight</span>
+        <span class="nav-label">体重</span>
+      </button>
+      <button class="nav-item" data-view="money">
+        <span class="material-symbols-outlined">account_balance_wallet</span>
+        <span class="nav-label">お金</span>
+      </button>
+      <button class="nav-item" data-view="walk">
+        <span class="material-symbols-outlined">directions_walk</span>
+        <span class="nav-label">歩行</span>
+      </button>
+      <button class="nav-item" data-view="run">
+        <span class="material-symbols-outlined">directions_run</span>
+        <span class="nav-label">走る</span>
+      </button>
+    </footer>
+  </div>
+
+  <!-- Google Identity Services (OAuth用) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <!-- メインスクリプト (ES Module) -->
+  <script type="module" src="js/main.js"></script>
+</body>
+
+</html>
