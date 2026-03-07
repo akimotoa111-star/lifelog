@@ -10,6 +10,7 @@ const BACKUP_FILE_NAME = 'lifelog_backup_v1.json';
 
 let tokenClient;
 let accessToken = null;
+let isSyncing = false;
 
 // 初期化（Google Identity Services）
 export function initAuth(onAuthChanged) {
