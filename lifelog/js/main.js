@@ -69,6 +69,26 @@ const views = {
       <button class="btn btn-primary" id="btn-save-money">追加する</button>
     </div>
     <!-- 残高・履歴表示領域 -->
+    <div class="card" id="money-summary-container" style="display: none;">
+      <div style="text-align: center; margin-bottom: 16px; font-weight: bold; font-size: 1.1rem;">今月の収支</div>
+      <div style="display: flex; justify-content: space-around; margin-bottom: 16px;">
+        <div style="text-align: center;">
+          <div style="font-size: 0.8rem; color: var(--color-text-secondary);">収入</div>
+          <div id="money-income-sum" style="color: #34C759; font-size: 1.1rem; font-weight: bold;">¥0</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 0.8rem; color: var(--color-text-secondary);">支出</div>
+          <div id="money-expense-sum" style="color: #FF3B30; font-size: 1.1rem; font-weight: bold;">¥0</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 0.8rem; color: var(--color-text-secondary);">収支</div>
+          <div id="money-balance-sum" style="font-size: 1.2rem; font-weight: bold;">¥0</div>
+        </div>
+      </div>
+      <div id="money-chart-wrapper" style="height: 150px; position: relative;">
+        <canvas id="money-chart" style="width:100%; height:100%;"></canvas>
+      </div>
+    </div>
     <div id="list-container" class="list-container"></div>
   `,
   walk: `
@@ -211,6 +231,8 @@ async function refreshList(viewName) {
       drawWeightChart(logs);
     } else if (viewName === 'walk') {
       drawWalkChart(logs);
+    } else if (viewName === 'money') {
+      drawMoneyChart(logs);
     } else {
       // グラフがない画面の場合は既存のグラフを破棄して非表示
       if (currentChart) {
@@ -523,8 +545,90 @@ function drawWalkChart(logs) {
   });
 }
 
+function drawMoneyChart(logs) {
+  const chartContainer = document.getElementById('money-summary-container');
+  if (!chartContainer) return;
+
+  // Canvas要素を再構築してChart.jsの内部キャッシュ・エラーを完全に防ぐ
+  const canvasWrapper = document.getElementById('money-chart-wrapper');
+  if (canvasWrapper) {
+    canvasWrapper.innerHTML = '<canvas id="money-chart" style="width:100%; height:100%;"></canvas>';
+  }
+  const canvas = document.getElementById('money-chart');
+  if (!canvas) return;
+
+  // 今月のデータを抽出 (現状の月 YYYY-MM)
+  const todayStr = new Date().toISOString().split('T')[0];
+  const currentMonth = todayStr.substring(0, 7);
+
+  const thisMonthLogs = logs.filter(log => log.date && log.date.startsWith(currentMonth));
+
+  // データが0件の場合でもサマリーとグラフ枠自体は表示させる
+  chartContainer.style.display = 'block';
+
+  let incomeSum = 0;
+  let expenseSum = 0;
+
+  thisMonthLogs.forEach(log => {
+    const amount = Number(log.amount) || 0;
+    if (log.moneyType === 'income') {
+      incomeSum += amount;
+    } else {
+      expenseSum += amount;
+    }
+  });
+
+  const balanceSum = incomeSum - expenseSum;
+
+  // サマリーテキストの更新
+  const incomeEl = document.getElementById('money-income-sum');
+  const expenseEl = document.getElementById('money-expense-sum');
+  const balanceEl = document.getElementById('money-balance-sum');
+
+  if (incomeEl) incomeEl.textContent = `+¥${incomeSum.toLocaleString()}`;
+  if (expenseEl) expenseEl.textContent = `-¥${expenseSum.toLocaleString()}`;
+  if (balanceEl) {
+    const sign = balanceSum > 0 ? '+' : '';
+    balanceEl.textContent = `${sign}¥${balanceSum.toLocaleString()}`;
+    // 黒字なら緑、赤字なら赤
+    balanceEl.style.color = balanceSum >= 0 ? '#34C759' : '#FF3B30';
+  }
+
+  if (currentChart) currentChart.destroy();
+
+  const ctx = canvas.getContext('2d');
+  currentChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['収入', '支出'],
+      datasets: [{
+        data: [incomeSum, expenseSum],
+        backgroundColor: ['#34C759', '#FF3B30'],
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              return '¥' + context.parsed.y.toLocaleString();
+            }
+          }
+        }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
 // =========================================================================
-// 初期化
+// 初期化とグローバルイベント
 // =========================================================================
 function initApp() {
   // 初期画面を「日記」にする
@@ -545,3 +649,23 @@ if (document.readyState === 'loading') {
   // すでにDOMの読み込みが完了している場合 (moduleや非同期の読み込み時)
   initApp();
 }
+
+// アプリがバックグラウンドから復帰した際に日付をまたいでいれば自動更新する
+let currentToday = new Date().toISOString().split('T')[0];
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    const newToday = new Date().toISOString().split('T')[0];
+    if (currentToday !== newToday) {
+      // 日付が変わっている場合、現在表示中の日付inputで昨日（以前のtoday）のままのものを書き換える
+      const dateInputs = document.querySelectorAll('input[type="date"]');
+      dateInputs.forEach(input => {
+        if (!input.value || input.value === currentToday || input.value < newToday) {
+          // 意図的に過去の日付を見ているケース以外は新しい「今日」にリセットする
+          input.value = newToday;
+        }
+      });
+      currentToday = newToday;
+    }
+  }
+});
