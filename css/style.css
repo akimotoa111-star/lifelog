@@ -1,0 +1,294 @@
+/* =========================================================================
+   基本変数とCSSリセット
+   ========================================================================= */
+
+:root {
+  /* Apple風の洗練されたモノトーン＋アクセントカラー */
+  --color-bg: #FFFFFF;
+  --color-bg-secondary: #F2F2F7;
+  --color-text: #000000;
+  --color-text-secondary: #8E8E93;
+  --color-border: #E5E5EA;
+  --color-border-focus: #000000;
+
+  /* アクセントカラー（日記、お金、健康などを抽象化するブルー） */
+  --color-primary: #007AFF;
+  --color-primary-light: #E5F1FF;
+
+  /* エラーや削除 */
+  --color-danger: #FF3B30;
+
+  /* タイポグラフィ */
+  --font-family: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* スペーシング */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* その他 */
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 16px;
+
+  /* シャドウ（控えめで上品な影） */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-nav: 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* ダークモード対応 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #000000;
+    --color-bg-secondary: #1C1C1E;
+    --color-text: #FFFFFF;
+    --color-text-secondary: #EBEBF5;
+    /* 弱めの透過色を利用して洗練度を上げる */
+    --color-border: #38383A;
+    --color-border-focus: #FFFFFF;
+
+    --color-primary: #0A84FF;
+    --color-primary-light: #0A244A;
+
+    --color-danger: #FF453A;
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --shadow-nav: 0 -1px 0 rgba(255, 255, 255, 0.15);
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  /* モバイルでのタップ時のハイライトを消す */
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* iOSでの慣性スクロールとオーバースクロール挙動の制御 */
+  overscroll-behavior-y: none;
+}
+
+/* =========================================================================
+   レイアウト (モバイルファースト・アプリ風枠組み)
+   ========================================================================= */
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  /* iOS Safariの実際の表示領域(100vh問題)に対応 */
+  height: 100dvh;
+  max-width: 600px;
+  /* PC閲覧時もスマホサイズに制限してアプリ感を出す */
+  margin: 0 auto;
+  position: relative;
+  background-color: var(--color-bg);
+  box-shadow: var(--shadow-md);
+  /* PCの中央配置時に境界を出す */
+}
+
+/* ヘッダー */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md);
+  height: 60px;
+  background-color: var(--color-bg);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.nav-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-sm);
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.icon-button:active {
+  background-color: var(--color-bg-secondary);
+}
+
+/* メインコンテンツエリア */
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-md);
+  background-color: var(--color-bg-secondary);
+  /* 慣性スクロール */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ボトムナビゲーション */
+.bottom-nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 65px;
+  background-color: var(--color-bg);
+  padding-bottom: env(safe-area-inset-bottom);
+  /* iPhone X以降のホームインジケーター対応 */
+  box-shadow: var(--shadow-nav);
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.nav-item.active {
+  color: var(--color-primary);
+}
+
+.nav-item .material-symbols-outlined {
+  font-size: 24px;
+  margin-bottom: 2px;
+  /* active時は塗りつぶしアイコンにする小技 */
+  font-variation-settings: 'FILL' 0;
+}
+
+.nav-item.active .material-symbols-outlined {
+  font-variation-settings: 'FILL' 1;
+}
+
+.nav-label {
+  font-size: 0.65rem;
+  font-weight: 500;
+}
+
+/* =========================================================================
+   UI コンポーネント
+   ========================================================================= */
+
+/* カード */
+.card {
+  background-color: var(--color-bg);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+  box-shadow: var(--shadow-sm);
+}
+
+/* フォーム要素 */
+.input-group {
+  margin-bottom: var(--space-md);
+}
+
+.input-label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-xs);
+  font-weight: 500;
+}
+
+.input-field {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+}
+
+textarea.input-field {
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* ボタン */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 14px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background-color: var(--color-text);
+  /* モノトーンの洗練さを出すために黒/白ベース */
+  color: var(--color-bg);
+}
+
+/* 表示内容が空の時のメッセージ */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl) var(--space-md);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.empty-state .material-symbols-outlined {
+  font-size: 48px;
+  margin-bottom: var(--space-md);
+  opacity: 0.5;
+}
+
+/* アニメーション */
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
