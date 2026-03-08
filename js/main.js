@@ -554,14 +554,9 @@ function drawMoneyChart(logs) {
   const todayStr = new Date().toISOString().split('T')[0];
   const currentMonth = todayStr.substring(0, 7);
 
-  const thisMonthLogs = logs.filter(log => log.date.startsWith(currentMonth));
+  const thisMonthLogs = logs.filter(log => log.date && log.date.startsWith(currentMonth));
 
-  if (thisMonthLogs.length === 0) {
-    chartContainer.style.display = 'none';
-    if (currentChart) currentChart.destroy();
-    return;
-  }
-
+  // データが0件の場合でもサマリーとグラフ枠自体は表示させる
   chartContainer.style.display = 'block';
 
   let incomeSum = 0;
