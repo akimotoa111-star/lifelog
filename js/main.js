@@ -85,7 +85,7 @@ const views = {
           <div id="money-balance-sum" style="font-size: 1.2rem; font-weight: bold;">¥0</div>
         </div>
       </div>
-      <div style="height: 150px;">
+      <div id="money-chart-wrapper" style="height: 150px; position: relative;">
         <canvas id="money-chart" style="width:100%; height:100%;"></canvas>
       </div>
     </div>
@@ -167,6 +167,15 @@ const viewTitles = {
   run: '走る',
   book: '読書'
 };
+
+// ローカルの現在日付 (YYYY-MM-DD) を取得するヘルパー関数
+function getLocalDateString() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 // =========================================================================
 // DOM要素の取得
@@ -334,7 +343,7 @@ function initViewLogic(viewName) {
   const dateInputs = document.querySelectorAll('input[type="date"]');
   dateInputs.forEach(input => {
     if (!input.value) {
-      input.value = new Date().toISOString().split('T')[0];
+      input.value = getLocalDateString();
     }
   });
 
@@ -547,11 +556,18 @@ function drawWalkChart(logs) {
 
 function drawMoneyChart(logs) {
   const chartContainer = document.getElementById('money-summary-container');
+  if (!chartContainer) return;
+
+  // Canvas要素を再構築してChart.jsの内部キャッシュ・エラーを完全に防ぐ
+  const canvasWrapper = document.getElementById('money-chart-wrapper');
+  if (canvasWrapper) {
+    canvasWrapper.innerHTML = '<canvas id="money-chart" style="width:100%; height:100%;"></canvas>';
+  }
   const canvas = document.getElementById('money-chart');
-  if (!chartContainer || !canvas) return;
+  if (!canvas) return;
 
   // 今月のデータを抽出 (現状の月 YYYY-MM)
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getLocalDateString();
   const currentMonth = todayStr.substring(0, 7);
 
   const thisMonthLogs = logs.filter(log => log.date && log.date.startsWith(currentMonth));
@@ -644,11 +660,11 @@ if (document.readyState === 'loading') {
 }
 
 // アプリがバックグラウンドから復帰した際に日付をまたいでいれば自動更新する
-let currentToday = new Date().toISOString().split('T')[0];
+let currentToday = getLocalDateString();
 
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
-    const newToday = new Date().toISOString().split('T')[0];
+    const newToday = getLocalDateString();
     if (currentToday !== newToday) {
       // 日付が変わっている場合、現在表示中の日付inputで昨日（以前のtoday）のままのものを書き換える
       const dateInputs = document.querySelectorAll('input[type="date"]');

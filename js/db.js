@@ -47,8 +47,12 @@ export async function saveLog(data) {
         // 更新日時を記録
         data.timestamp = Date.now();
         if (!data.date) {
-            // dateが未指定なら今日の日付 (YYYY-MM-DD)
-            data.date = new Date().toISOString().split('T')[0];
+            // dateが未指定なら今日の日付 (YYYY-MM-DD)ローカル時間ベース
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            data.date = `${year}-${month}-${day}`;
         }
 
         const request = store.put(data);
